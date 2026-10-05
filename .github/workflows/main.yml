@@ -15,7 +15,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Compile with Maven
+      - name: Package with Maven
         run: mvn compile
 
       - name: Build Docker Image
