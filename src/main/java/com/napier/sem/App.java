@@ -20,6 +20,12 @@ public class App
         // Connect to database
         a.connect();
 
+        // Get Employee
+        Employee emp = a.getEmployee(255530);
+
+        // Display Employee
+        a.displayEmployee(emp);
+
         // Disconnect from database
         a.disconnect();
     }
@@ -48,7 +54,7 @@ public class App
 
             try
             {
-                // Wait a bit for db to start
+                // Wait a bit for database to start
                 Thread.sleep(30000);
 
                 // Connect to database
@@ -59,6 +65,8 @@ public class App
                 );
 
                 System.out.println("Successfully connected");
+
+                // Exit loop
                 break;
             }
             catch (SQLException sqle)
@@ -71,7 +79,9 @@ public class App
             }
             catch (InterruptedException ie)
             {
-                System.out.println("Thread interrupted? Should not happen.");
+                System.out.println(
+                        "Thread interrupted? Should not happen."
+                );
             }
         }
     }
@@ -86,22 +96,47 @@ public class App
             // Create an SQL statement
             Statement stmt = con.createStatement();
 
-            // Create string for SQL statement
+            // SQL query to get current employee information
             String strSelect =
-                    "SELECT emp_no, first_name, last_name "
-                            + "FROM employees "
-                            + "WHERE emp_no = " + ID;
+                    "SELECT e.emp_no, e.first_name, e.last_name, " +
+                            "t.title, s.salary, d.dept_name, " +
+                            "CONCAT(m.first_name, ' ', m.last_name) AS manager " +
+                            "FROM employees e " +
+
+                            "JOIN titles t ON e.emp_no = t.emp_no " +
+                            "AND t.to_date = '9999-01-01' " +
+
+                            "JOIN salaries s ON e.emp_no = s.emp_no " +
+                            "AND s.to_date = '9999-01-01' " +
+
+                            "JOIN dept_emp de ON e.emp_no = de.emp_no " +
+                            "AND de.to_date = '9999-01-01' " +
+
+                            "JOIN departments d ON de.dept_no = d.dept_no " +
+
+                            "JOIN dept_manager dm ON de.dept_no = dm.dept_no " +
+                            "AND dm.to_date = '9999-01-01' " +
+
+                            "JOIN employees m ON dm.emp_no = m.emp_no " +
+
+                            "WHERE e.emp_no = " + ID;
 
             // Execute SQL statement
             ResultSet rset = stmt.executeQuery(strSelect);
 
-            // Check one is returned
+            // Check if an employee was returned
             if (rset.next())
             {
                 Employee emp = new Employee();
+
                 emp.emp_no = rset.getInt("emp_no");
                 emp.first_name = rset.getString("first_name");
                 emp.last_name = rset.getString("last_name");
+                emp.title = rset.getString("title");
+                emp.salary = rset.getInt("salary");
+                emp.dept_name = rset.getString("dept_name");
+                emp.manager = rset.getString("manager");
+
                 return emp;
             }
             else
@@ -114,6 +149,25 @@ public class App
             System.out.println(e.getMessage());
             System.out.println("Failed to get employee details");
             return null;
+        }
+    }
+
+    /**
+     * Display an employee.
+     */
+    public void displayEmployee(Employee emp)
+    {
+        if (emp != null)
+        {
+            System.out.println(
+                    emp.emp_no + " "
+                            + emp.first_name + " "
+                            + emp.last_name + "\n"
+                            + emp.title + "\n"
+                            + "Salary:" + emp.salary + "\n"
+                            + emp.dept_name + "\n"
+                            + "Manager: " + emp.manager + "\n"
+            );
         }
     }
 
@@ -131,7 +185,9 @@ public class App
             }
             catch (Exception e)
             {
-                System.out.println("Error closing connection to database");
+                System.out.println(
+                        "Error closing connection to database"
+                );
             }
         }
     }
