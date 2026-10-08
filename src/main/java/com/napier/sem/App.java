@@ -27,6 +27,9 @@ public class App
         // Display salary report for a given role
         a.displaySalariesByRole("Engineer");
 
+        // Display salary report for all employees
+        a.displaySalariesAllEmployees();
+
         // Disconnect from database
         a.disconnect();
     }
@@ -228,6 +231,61 @@ public class App
         {
             System.out.println(e.getMessage());
             System.out.println("Failed to get salaries by role");
+        }
+    }
+
+    /**
+     * Display current salary information for all employees.
+     */
+    public void displaySalariesAllEmployees()
+    {
+        if (con == null)
+        {
+            System.out.println("No database connection");
+            return;
+        }
+
+        String strSelect =
+                "SELECT e.emp_no, e.first_name, e.last_name, s.salary " +
+                        "FROM employees e " +
+                        "JOIN salaries s ON e.emp_no = s.emp_no " +
+                        "WHERE s.to_date = '9999-01-01' " +
+                        "ORDER BY e.emp_no ASC";
+
+        System.out.println("\nSalary Report for All Employees");
+        System.out.println(
+                "Employee Number | First Name | Last Name | Salary"
+        );
+
+        try (PreparedStatement stmt = con.prepareStatement(strSelect);
+             ResultSet rset = stmt.executeQuery())
+        {
+            int count = 0;
+
+            while (rset.next())
+            {
+                System.out.printf(
+                        "%-15d %-18s %-20s %d%n",
+                        rset.getInt("emp_no"),
+                        rset.getString("first_name"),
+                        rset.getString("last_name"),
+                        rset.getInt("salary")
+                );
+
+                count++;
+            }
+
+            if (count == 0)
+            {
+                System.out.println("No current salary records found.");
+            }
+
+            System.out.println("Total employees: " + count);
+        }
+        catch (SQLException e)
+        {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to get salaries for all employees");
         }
     }
 
