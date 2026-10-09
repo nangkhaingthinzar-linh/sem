@@ -13,6 +13,8 @@ class App {
     +displaySalariesAllEmployees() : void
     +getDepartment(dept_name : String) : Department
     +getSalariesByDepartment(dept : Department) : ArrayList<Employee>
+    +displayDepartmentSalaryReport(departmentName : String) : void
+    +getEmployeeByName(firstName : String, lastName : String) : Employee
     +disconnect() : void
 }
 
