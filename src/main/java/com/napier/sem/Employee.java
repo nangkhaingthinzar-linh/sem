@@ -1,7 +1,8 @@
+
 package com.napier.sem;
 
 /**
- * Represents an employee.
+ * Represents an employee in the organisation.
  */
 public class Employee
 {
@@ -26,17 +27,17 @@ public class Employee
     public String title;
 
     /**
-     * Employee's salary.
+     * Employee's current salary.
      */
     public int salary;
 
     /**
      * Employee's current department.
      */
-    public String dept_name;
+    public Department dept;
 
     /**
      * Employee's manager.
      */
-    public String manager;
+    public Employee manager;
 }
