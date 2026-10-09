@@ -1,0 +1,42 @@
+
+@startuml
+title seMethods - UML Class Diagram
+
+class App {
+    -con : Connection
+    --
+    {static} +main(args : String[]) : void
+    +connect() : void
+    +getEmployee(ID : int) : Employee
+    +displayEmployee(emp : Employee) : void
+    +displaySalariesByRole(role : String) : void
+    +displaySalariesAllEmployees() : void
+    +getDepartment(dept_name : String) : Department
+    +getSalariesByDepartment(dept : Department) : ArrayList<Employee>
+    +disconnect() : void
+}
+
+class Employee {
+    +emp_no : int
+    +first_name : String
+    +last_name : String
+    +title : String
+    +salary : int
+    +dept : Department
+    +manager : Employee
+}
+
+class Department {
+    +dept_no : String
+    +dept_name : String
+    +manager : Employee
+}
+
+App ..> Employee : uses / creates
+App ..> Department : uses / creates
+
+Employee --> Department : dept
+Employee --> Employee : manager
+Department --> Employee : manager
+
+@enduml
