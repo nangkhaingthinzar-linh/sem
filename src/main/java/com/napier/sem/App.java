@@ -15,7 +15,7 @@ public class App
     private Connection con = null;
 
     /**
-     * Main method to run the reports.
+     * Main method.
      */
     public static void main(String[] args)
     {
@@ -24,7 +24,7 @@ public class App
         // Connect to the database
         a.connect();
 
-        // Display an employee's details
+        // Display employee details using employee number
         Employee emp = a.getEmployee(255530);
         a.displayEmployee(emp);
 
@@ -34,43 +34,19 @@ public class App
         // Lab 04: Salary report for all employees
         // a.displaySalariesAllEmployees();
 
-        // Lab 05: Salary report for the Sales department
-        Department dept = a.getDepartment("Sales");
+        // Lab 05: Salary report for a department
+        // Temporarily disabled to make Exercise 3 testing faster.
+        // a.displayDepartmentSalaryReport("Sales");
 
-        if (dept != null)
-        {
-            System.out.println(
-                    "\nSalary Report for Department: " + dept.dept_name
-            );
+        // Lab 05 Exercise 3: Search employee by first and last name
+        System.out.println("\nEmployee Search by Name");
 
-            System.out.println(
-                    "Employee Number | First Name | Last Name | Salary"
-            );
+        Employee searchedEmployee =
+                a.getEmployeeByName("Ronghao", "Garigliano");
 
-            ArrayList<Employee> employees =
-                    a.getSalariesByDepartment(dept);
+        a.displayEmployee(searchedEmployee);
 
-            for (Employee employee : employees)
-            {
-                System.out.printf(
-                        "%-15d %-18s %-20s %d%n",
-                        employee.emp_no,
-                        employee.first_name,
-                        employee.last_name,
-                        employee.salary
-                );
-            }
-
-            System.out.println(
-                    "Total employees: " + employees.size()
-            );
-        }
-        else
-        {
-            System.out.println("Department not found.");
-        }
-
-        // Disconnect from the database
+        // Disconnect from database
         a.disconnect();
     }
 
@@ -112,7 +88,7 @@ public class App
             catch (SQLException sqle)
             {
                 System.out.println(
-                        "Failed to connect to database attempt " + i
+                        "Failed to connect to database attempt " + (i + 1)
                 );
                 System.out.println(sqle.getMessage());
             }
@@ -174,12 +150,12 @@ public class App
                     emp.title = rset.getString("title");
                     emp.salary = rset.getInt("salary");
 
-                    // Create the department object
+                    // Create department object
                     Department dept = new Department();
                     dept.dept_no = rset.getString("dept_no");
                     dept.dept_name = rset.getString("dept_name");
 
-                    // Create the manager object
+                    // Create manager object
                     int managerNo = rset.getInt("manager_no");
 
                     if (!rset.wasNull())
@@ -407,7 +383,7 @@ public class App
                     dept.dept_no = rset.getString("dept_no");
                     dept.dept_name = rset.getString("dept_name");
 
-                    // Retrieve the current department manager
+                    // Retrieve current department manager
                     int managerNo = rset.getInt("manager_no");
 
                     if (!rset.wasNull())
@@ -489,6 +465,103 @@ public class App
         }
 
         return employees;
+    }
+
+    /**
+     * Display the salary report for a given department.
+     *
+     * @param departmentName Department name.
+     */
+    public void displayDepartmentSalaryReport(String departmentName)
+    {
+        Department dept = getDepartment(departmentName);
+
+        if (dept == null)
+        {
+            System.out.println("Department not found.");
+            return;
+        }
+
+        System.out.println(
+                "\nSalary Report for Department: " + dept.dept_name
+        );
+
+        System.out.println(
+                "Employee Number | First Name | Last Name | Salary"
+        );
+
+        ArrayList<Employee> employees =
+                getSalariesByDepartment(dept);
+
+        for (Employee employee : employees)
+        {
+            System.out.printf(
+                    "%-15d %-18s %-20s %d%n",
+                    employee.emp_no,
+                    employee.first_name,
+                    employee.last_name,
+                    employee.salary
+            );
+        }
+
+        System.out.println(
+                "Total employees: " + employees.size()
+        );
+    }
+
+    /**
+     * Find an employee by first name and last name.
+     *
+     * If multiple employees have the same name,
+     * the employee with the lowest employee number is returned.
+     *
+     * @param firstName Employee's first name.
+     * @param lastName Employee's last name.
+     * @return Employee object or null if not found.
+     */
+    public Employee getEmployeeByName(String firstName, String lastName)
+    {
+        if (con == null)
+        {
+            System.out.println("No database connection");
+            return null;
+        }
+
+        String strSelect =
+                "SELECT emp_no " +
+                        "FROM employees " +
+                        "WHERE first_name = ? " +
+                        "AND last_name = ? " +
+                        "ORDER BY emp_no ASC " +
+                        "LIMIT 1";
+
+        try (PreparedStatement stmt = con.prepareStatement(strSelect))
+        {
+            stmt.setString(1, firstName);
+            stmt.setString(2, lastName);
+
+            int employeeNumber = -1;
+
+            try (ResultSet rset = stmt.executeQuery())
+            {
+                if (rset.next())
+                {
+                    employeeNumber = rset.getInt("emp_no");
+                }
+            }
+
+            if (employeeNumber != -1)
+            {
+                return getEmployee(employeeNumber);
+            }
+        }
+        catch (SQLException e)
+        {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to find employee by name");
+        }
+
+        return null;
     }
 
     /**
