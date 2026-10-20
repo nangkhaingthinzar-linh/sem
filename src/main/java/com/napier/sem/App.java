@@ -584,4 +584,50 @@ public class App
             }
         }
     }
+
+    /**
+     * Lab 06: Print salaries for a list of employees.
+     *
+     * @param employees List of employees to display.
+     */
+    public void printSalaries(ArrayList<Employee> employees)
+    {
+        // Check whether the list is null
+        if (employees == null)
+        {
+            System.out.println("No employees");
+            return;
+        }
+
+        // Print salary table header
+        System.out.println(
+                String.format(
+                        "%-10s %-15s %-20s %-8s",
+                        "Emp No",
+                        "First Name",
+                        "Last Name",
+                        "Salary"
+                )
+        );
+
+        // Print employee salary information
+        for (Employee emp : employees)
+        {
+            // Skip null employees
+            if (emp == null)
+            {
+                continue;
+            }
+
+            String empString = String.format(
+                    "%-10s %-15s %-20s %-8s",
+                    emp.emp_no,
+                    emp.first_name,
+                    emp.last_name,
+                    emp.salary
+            );
+
+            System.out.println(empString);
+        }
+    }
 }
